@@ -20,47 +20,6 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 Route::post('/register', [AuthController::class, 'register']); 
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 
-// Route::middleware(['web', 'signed'])->get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-//     $request->fulfill();
-//     return redirect(config('app.frontend_url') . '/verified?status=success');
-// })->name('verification.verify');
-
-// Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
-//     $user = Auth::guard('sanctum')->user();
-
-//     if (!$user || $user->id != $id) {
-//         return response()->json(['message' => 'Invalid user.'], 403);
-//     }
-
-//     if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
-//         return response()->json(['message' => 'Invalid hash.'], 403);
-//     }
-
-//     if ($user->hasVerifiedEmail()) {
-//         return response()->json(['message' => 'Already verified.'], 200);
-//     }
-
-//     $user->markEmailAsVerified();
-
-//     return response()->json(['message' => 'Email verified successfully.'], 200);
-// })->middleware(['auth:sanctum', 'signed'])->name('verification.verify');
-
-// Route::post('/email/verification-notification', function (Request $request) {
-//     $request->user()->sendEmailVerificationNotification();
-//     return response()->json(['message' => 'Verification link sent!']);
-// })->middleware(['auth:sanctum', 'throttle:6,1'])->name('verification.send');
-
-// Route::get('/sanctum/csrf-cookie', function () {
-//     return response()->json(['message' => 'CSRF cookie set']);
-// });
-
-
-
-// Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-//     $request->fulfill(); 
-
-//     return response()->json(['message' => 'Email verified!']);
-// })->middleware(['signed']); 
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
@@ -101,7 +60,8 @@ Route::prefix('products')->group(function () {
     Route::get('/filter/category', [ProductController::class, 'filterByCategory']);
     Route::get('/filter/tag', [ProductController::class, 'filterByTag']);
     Route::get('/filter/brand', [ProductController::class, 'filterByBrand']);
-
+    
+    Route::get('/allProducts', [ProductController::class, 'index']);
     Route::get('/categories', [ProductController::class, 'getCategories']);
     Route::get('/brands', [ProductController::class, 'getBrands']);
     Route::get('/tags', [ProductController::class, 'getTags']);
