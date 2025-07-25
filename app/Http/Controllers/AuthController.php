@@ -9,6 +9,7 @@ use Illuminate\Validation\Rules\Password;
 use App\Rules\InternationalMobilePhone;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
