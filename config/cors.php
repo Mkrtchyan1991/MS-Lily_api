@@ -33,7 +33,7 @@ return [
         'Content-Type',
         // 'X-Requested-With',
         // 'Authorization',
-        'X-CSRF-TOKEN',
+        // 'X-CSRF-TOKEN',
     ],
 
     'exposed_headers' => [],
