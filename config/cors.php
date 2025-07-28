@@ -25,7 +25,7 @@ return [
 
     'allowed_methods' => ['GET', 'POST',  'PATCH', 'DELETE'],
 
-    'allowed_origins' => ['http://localhost:5173','koyeb.app',],
+    'allowed_origins' => ['*',],
 
     'allowed_origins_patterns' => [],
 
