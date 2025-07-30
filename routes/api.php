@@ -14,26 +14,20 @@ use App\Http\Controllers\Auth\VerificationController;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
-
-
-
-
-
 Route::post('/register', [AuthController::class, 'register']); 
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 
-
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request): JsonResponse {
     $request->fulfill();
-
     return response()->json(['message' => 'Email verified!']);
 })->middleware(['signed'])->name('verification.verify');
 
-
-Route::middleware(['auth:sanctum'])->group(function () {
+// Authentication disabled - removed auth:sanctum middleware
+Route::group([], function () {
     Route::get('/user', fn(Request $request) => response()->json($request->user()));
 
-    Route::middleware(['admin'])->group(function () {
+    // Admin middleware disabled - removed ['admin']
+    Route::group([], function () {
         Route::get('/admin/dashboard', fn(Request $request) => response()->json([
             'auth' => Auth::check(),
             'user' => $request->user(),
@@ -46,7 +40,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'updateProfile']);
 });
 
- Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
+// Admin product routes - auth and admin middleware disabled
+Route::prefix('admin')->group(function () {
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/{id}', [ProductController::class, 'show']);
     Route::post('/products/store', [ProductController::class, 'store']);
@@ -56,8 +51,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/products/filter/category', [ProductController::class, 'filterByCategory']);
     Route::get('/products/filter/tag', [ProductController::class, 'filterByTag']);
     Route::get('/products/filter/brand', [ProductController::class, 'filterByBrand']);
- });
+});
 
+// Public product routes
 Route::prefix('products')->group(function () {
     Route::get('/filter/category', [ProductController::class, 'filterByCategory']);
     Route::get('/filter/tag', [ProductController::class, 'filterByTag']);
@@ -69,25 +65,29 @@ Route::prefix('products')->group(function () {
     Route::get('/tags', [ProductController::class, 'getTags']);
 });
 
- Route::middleware(['auth:sanctum'])->group(function () {
+// Favorites routes - auth middleware disabled
+Route::group([], function () {
     Route::post('/favorites/{productId}/toggle', [FavoriteController::class, 'toggle']);
     Route::delete('/favorites/{productId}', [FavoriteController::class, 'remove']);
     Route::get('/favorites', [FavoriteController::class, 'getFavorites']);
- });
+});
 
- Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/orders', [OrderController::class, 'store']);                 // Place new order
-    Route::get('/orders', [OrderController::class, 'userOrders']);             // User's own orders
-    Route::get('/admin/orders', [OrderController::class, 'allOrders'])->middleware('role:admin'); // Admin only
-    Route::patch('/admin/orders/{order}/status', [OrderController::class, 'updateStatus'])->middleware('role:admin');
- });
+// Orders routes - auth and role middleware disabled
+Route::group([], function () {
+    Route::post('/orders', [OrderController::class, 'store']);
+    Route::get('/orders', [OrderController::class, 'userOrders']);
+    Route::get('/admin/orders', [OrderController::class, 'allOrders']); // role:admin removed
+    Route::patch('/admin/orders/{order}/status', [OrderController::class, 'updateStatus']); // role:admin removed
+});
 
- Route::middleware(['auth:sanctum'])->group(function () {
+// Comments routes - auth and role middleware disabled
+Route::group([], function () {
     Route::post('/products/{productId}/comments', [CommentController::class, 'store']);
     Route::get('/products/{productId}/comments', [CommentController::class, 'indexByProduct']);
-    Route::middleware('role:admin')->group(function () {
+    
+    // Admin comment routes - role middleware disabled
+    Route::group([], function () {
         Route::get('/admin/comments/pending', [CommentController::class, 'pending']);
         Route::patch('/admin/comments/{id}/approve', [CommentController::class, 'approve']);
     });
-  });
-  
+});
