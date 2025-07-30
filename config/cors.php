@@ -25,7 +25,7 @@ return [
 
     'allowed_methods' => ['GET', 'POST',  'PATCH', 'DELETE'],
 
-    'allowed_origins' => ['http://localhost:5173','koyeb.app',],
+    'allowed_origins' => ['http://localhost:5173','registered-phylis-mslily-73b1dfa2.koyeb.app',],
 
     'allowed_origins_patterns' => [],
 
