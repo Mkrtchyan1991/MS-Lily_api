@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\Orders\OrderController;
@@ -17,14 +18,15 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 
 
+
 Route::post('/register', [AuthController::class, 'register']); 
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 
-Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request): JsonResponse {
     $request->fulfill();
 
-    return redirect('>json(['message' => 'Email verified!'])');
+    return response()->json(['message' => 'Email verified!']);
 })->middleware(['signed'])->name('verification.verify');
 
 
