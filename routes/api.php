@@ -101,21 +101,14 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 });
 
 // Admin user management routes (protected by auth:sanctum and admin middleware)
+// Then add these routes inside your admin middleware group:
 Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
+    // ... existing product routes ...
 
-    // User CRUD operations
-    Route::get('/users', [UserController::class, 'index']);                    // GET /api/admin/users - List all users with search/filter
-    Route::get('/users/{id}', [UserController::class, 'show']);               // GET /api/admin/users/{id} - Show specific user
-    Route::post('/users', [UserController::class, 'store']);                  // POST /api/admin/users - Create new user
-    Route::put('/users/{id}', [UserController::class, 'update']);             // PUT /api/admin/users/{id} - Update user
-    Route::delete('/users/{id}', [UserController::class, 'destroy']);         // DELETE /api/admin/users/{id} - Delete user
-
-    // User management actions
-    Route::patch('/users/{id}/toggle-role', [UserController::class, 'toggleRole']);        // PATCH /api/admin/users/{id}/toggle-role
-    Route::patch('/users/{id}/verify-email', [UserController::class, 'verifyEmail']);      // PATCH /api/admin/users/{id}/verify-email
-    Route::patch('/users/{id}/toggle-suspension', [UserController::class, 'toggleSuspension']); // PATCH /api/admin/users/{id}/toggle-suspension
-
-    // Statistics
-    Route::get('/users/stats/overview', [UserController::class, 'statistics']);           // GET /api/admin/users/stats/overview
-
+    // User management routes
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/{id}', [UserController::class, 'show']);
+    Route::post('/users', [UserController::class, 'store']);
+    Route::patch('/users/{id}', [UserController::class, 'update']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
 });
