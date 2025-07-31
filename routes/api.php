@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\VerificationController;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
+// Public routes (no authentication required)
 Route::post('/register', [AuthController::class, 'register']); 
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 
@@ -22,26 +23,27 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
     return response()->json(['message' => 'Email verified!']);
 })->middleware(['signed'])->name('verification.verify');
 
-// Authentication disabled - removed auth:sanctum middleware
-Route::group([], function () {
+// Protected routes (require Bearer token authentication)
+Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/user', fn(Request $request) => response()->json($request->user()));
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout-all-devices', [AuthController::class, 'logoutAllDevices']);
 
-    // Admin middleware disabled - removed ['admin']
-    Route::group([], function () {
+    // Profile routes
+    Route::get('/profile', [ProfileController::class, 'profile']);
+    Route::patch('/profile', [ProfileController::class, 'updateProfile']);
+
+    // Admin routes
+    Route::group(['middleware' => ['admin']], function () {
         Route::get('/admin/dashboard', fn(Request $request) => response()->json([
             'auth' => Auth::check(),
             'user' => $request->user(),
         ]));
     });
-
-    Route::post('/logout', [AuthController::class, 'logout']);
-
-    Route::get('/profile', [ProfileController::class, 'profile']);
-    Route::patch('/profile', [ProfileController::class, 'updateProfile']);
 });
 
-// Admin product routes - auth and admin middleware disabled
-Route::prefix('admin')->group(function () {
+// Admin product routes (protected)
+Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/{id}', [ProductController::class, 'show']);
     Route::post('/products/store', [ProductController::class, 'store']);
@@ -53,7 +55,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/products/filter/brand', [ProductController::class, 'filterByBrand']);
 });
 
-// Public product routes
+// Public product routes (no authentication required)
 Route::prefix('products')->group(function () {
     Route::get('/filter/category', [ProductController::class, 'filterByCategory']);
     Route::get('/filter/tag', [ProductController::class, 'filterByTag']);
@@ -65,28 +67,32 @@ Route::prefix('products')->group(function () {
     Route::get('/tags', [ProductController::class, 'getTags']);
 });
 
-// Favorites routes - auth middleware disabled
-Route::group([], function () {
+// Favorites routes (protected)
+Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/favorites/{productId}/toggle', [FavoriteController::class, 'toggle']);
     Route::delete('/favorites/{productId}', [FavoriteController::class, 'remove']);
     Route::get('/favorites', [FavoriteController::class, 'getFavorites']);
 });
 
-// Orders routes - auth and role middleware disabled
-Route::group([], function () {
+// Orders routes (protected)
+Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders', [OrderController::class, 'userOrders']);
-    Route::get('/admin/orders', [OrderController::class, 'allOrders']); // role:admin removed
-    Route::patch('/admin/orders/{order}/status', [OrderController::class, 'updateStatus']); // role:admin removed
+    
+    // Admin order routes
+    Route::group(['middleware' => ['admin']], function () {
+        Route::get('/admin/orders', [OrderController::class, 'allOrders']);
+        Route::patch('/admin/orders/{order}/status', [OrderController::class, 'updateStatus']);
+    });
 });
 
-// Comments routes - auth and role middleware disabled
-Route::group([], function () {
+// Comments routes (protected)
+Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/products/{productId}/comments', [CommentController::class, 'store']);
     Route::get('/products/{productId}/comments', [CommentController::class, 'indexByProduct']);
     
-    // Admin comment routes - role middleware disabled
-    Route::group([], function () {
+    // Admin comment routes
+    Route::group(['middleware' => ['admin']], function () {
         Route::get('/admin/comments/pending', [CommentController::class, 'pending']);
         Route::patch('/admin/comments/{id}/approve', [CommentController::class, 'approve']);
     });

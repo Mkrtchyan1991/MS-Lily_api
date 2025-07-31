@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rules\Password;
 use App\Rules\InternationalMobilePhone;
 use App\Models\User;
+use App\Http\Resources\UserResource;
 use Illuminate\Auth\Events\Registered;
 
 class AuthController extends Controller
@@ -77,9 +78,6 @@ class AuthController extends Controller
         // Create Sanctum token
         $token = $user->createToken('API Token')->plainTextToken;
 
-        // Store token in session
-        Session::put('auth_token', $token);
-
         // Log successful login
         Log::info('User login', [
             'user_id' => $user->id,
@@ -88,15 +86,17 @@ class AuthController extends Controller
             'timestamp' => now()
         ]);
 
-        return response()->json(['message' => 'Login successful']);
+        // Return token and user data to frontend
+        return response()->json([
+            'message' => 'Login successful',
+            'token' => $token,
+            'user' => new UserResource($user)
+        ]);
     }
 
     public function logout(Request $request)
     {
         $user = $request->user();
-
-        // Track if we successfully logged out from any authentication method
-        $loggedOut = false;
 
         // Handle Sanctum token-based logout (API requests)
         if ($user && $user->currentAccessToken()) {
@@ -109,43 +109,15 @@ class AuthController extends Controller
 
             // Delete the current access token
             $user->currentAccessToken()->delete();
-            $loggedOut = true;
-        }
 
-        // Handle session-based logout (web requests)
-        if (Auth::guard('web')->check()) {
-            // Log the session-based logout before clearing session
-            Log::info('Session-based logout', [
-                'user_id' => Auth::id(),
-                'session_id' => $request->session()->getId(),
-                'ip' => $request->ip()
-            ]);
-
-            // Logout from web guard
-            Auth::guard('web')->logout();
-
-            // Invalidate the session
-            $request->session()->invalidate();
-
-            // Regenerate CSRF token for security
-            $request->session()->regenerateToken();
-
-            // Clear any stored auth token from session
-            Session::forget('auth_token');
-
-            $loggedOut = true;
-        }
-
-        // Ensure we have some form of authentication to logout from
-        if (!$loggedOut) {
             return response()->json([
-                'message' => 'No active session or token found'
-            ], 401);
+                'message' => 'Logged out successfully'
+            ], 200);
         }
 
         return response()->json([
-            'message' => 'Logged out successfully'
-        ], 200);
+            'message' => 'No active token found'
+        ], 401);
     }
 
     /**
@@ -171,14 +143,6 @@ class AuthController extends Controller
 
         // Revoke all tokens for this user
         $user->tokens()->delete();
-
-        // Clear current session if exists
-        if (Auth::guard('web')->check()) {
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            Session::forget('auth_token');
-        }
 
         return response()->json([
             'message' => 'Logged out from all devices successfully'

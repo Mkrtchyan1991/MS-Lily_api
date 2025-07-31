@@ -1,5 +1,5 @@
 <?php
-// config/cors.php - Updated for Sanctum SPA authentication
+// config/cors.php - Updated for Bearer token authentication
 
 return [
     /*
@@ -10,7 +10,6 @@ return [
     
     'paths' => [
         'api/*',
-        'sanctum/csrf-cookie',
         'login',
         'logout',
         'register',
@@ -30,19 +29,12 @@ return [
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => [
-        '*' // Allow all headers for simplicity, or specify:
-        // 'Content-Type',
-        // 'X-Requested-With',
-        // 'Authorization',
-        // 'X-CSRF-TOKEN',
-        // 'X-XSRF-TOKEN',
-        // 'Accept',
-        // 'Origin',
+        '*' // Allow all headers including Authorization
     ],
 
     'exposed_headers' => [],
 
     'max_age' => 0,
 
-    'supports_credentials' => true, // CRITICAL: This enables cookie-based auth
+    'supports_credentials' => false, // Changed to false for Bearer token auth
 ];
