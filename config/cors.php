@@ -23,7 +23,7 @@ return [
         'http://localhost:3000',  // Common React port
         'http://127.0.0.1:5173',
         'http://127.0.0.1:3000',
-        'https://ms-lily-admin.koyeb.app/', // Your production domain
+        'https://ms-lily-admin.koyeb.app', // Your production domain
     ],
 
     'allowed_origins_patterns' => [],
