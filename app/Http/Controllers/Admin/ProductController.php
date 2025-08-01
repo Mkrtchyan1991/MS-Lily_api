@@ -204,24 +204,7 @@ class ProductController extends Controller
         return response()->json(['message' => 'Product deleted!']);
     }
 
-    // Metadata endpoints - these remain unchanged
-    public function getCategories()
-    {
-        //Gipt alle Kategorien zurück,hol alle Einträge aus der Tabele Category
-        return response()->json(Category::all());
-    }
 
-    public function getBrands()
-    {
-        //Gipt alle Marken zurück
-        return response()->json(Brand::all());
-    }
-
-    public function getTags()
-    {
-        //Gipt alle Tags zurück
-        return response()->json(Tag::all());
-    }
 
     // Optional: Get filter options with product counts
     public function getFilterOptions()

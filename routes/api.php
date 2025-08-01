@@ -61,18 +61,9 @@ Route::prefix('products')->group(function () {
     // Individual show route
     Route::get('/{id}', [ProductController::class, 'show']);
 
-    // Metadata endpoints
-    Route::get('/meta/categories', [ProductController::class, 'getCategories']);
-    Route::get('/meta/brands', [ProductController::class, 'getBrands']);
-    Route::get('/meta/tags', [ProductController::class, 'getTags']);
-
     // Combined filter options endpoint (optional - provides all filter data in one request)
-    Route::get('/meta/filter-options', [ProductController::class, 'getFilterOptions']);
+    Route::get('/filter-options', [ProductController::class, 'getFilterOptions']);
 
-    // Backward compatibility routes (optional - can be removed later)
-    Route::get('/categories', [ProductController::class, 'getCategories']);
-    Route::get('/brands', [ProductController::class, 'getBrands']);
-    Route::get('/tags', [ProductController::class, 'getTags']);
 });
 
 // Favorites routes (protected)
