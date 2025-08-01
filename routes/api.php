@@ -58,12 +58,11 @@ Route::prefix('products')->group(function () {
     // Main products endpoint with filtering capabilities
     Route::get('/allProducts', [ProductController::class, 'index']);
 
-    // Individual show route
-    Route::get('/{id}', [ProductController::class, 'show']);
-
     // Combined filter options endpoint (optional - provides all filter data in one request)
     Route::get('/filter-options', [ProductController::class, 'getFilterOptions']);
 
+    // Individual show route
+    Route::get('/{id}', [ProductController::class, 'show']);
 });
 
 // Favorites routes (protected)
