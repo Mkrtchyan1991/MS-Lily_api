@@ -31,14 +31,23 @@ class ProductResource extends JsonResource
                  //Gipt brand name zurück,wenn gips nicht dann null
                 'name' => $this->brand->name ?? null,
             ],
-             //Gipt die Daten  zurück
-            'tags'        => $this->tags->pluck('name'), 
+             //Gipt die Daten zurück
+            'tags'        => $this->tags->map(function ($tag) {
+                return [
+                    'id' => $tag->id,
+                    'name' => $tag->name,
+                ];
+            }),
             'color'       => $this->color,
             'size'        => $this->size,
+            'price'       => $this->price ? (float) $this->price : null,
+            'stock'       => $this->stock ?? 0,
+            'in_stock'    => ($this->stock ?? 0) > 0,
              //Wenn gips bild bring zurück storage/ URL,wenn gips nicht dann null
             'image'       => $this->image ? asset('storage/' . $this->image) : null,
             //Gipt zurück die Erstellungsdatum
             'created_at'  => $this->created_at,
+            'updated_at'  => $this->updated_at,
         ];
     }
 }

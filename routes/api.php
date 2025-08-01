@@ -51,19 +51,25 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::post('/products/store', [ProductController::class, 'store']);
     Route::patch('/products/{product}', [ProductController::class, 'update']);
     Route::delete('/products/{product}', [ProductController::class, 'destroy']);
-
-    Route::get('/products/filter/category', [ProductController::class, 'filterByCategory']);
-    Route::get('/products/filter/tag', [ProductController::class, 'filterByTag']);
-    Route::get('/products/filter/brand', [ProductController::class, 'filterByBrand']);
 });
 
 // Public product routes (no authentication required)
 Route::prefix('products')->group(function () {
-    Route::get('/filter/category', [ProductController::class, 'filterByCategory']);
-    Route::get('/filter/tag', [ProductController::class, 'filterByTag']);
-    Route::get('/filter/brand', [ProductController::class, 'filterByBrand']);
-
+    // Main products endpoint with filtering capabilities
     Route::get('/allProducts', [ProductController::class, 'index']);
+
+    // Individual show route
+    Route::get('/{id}', [ProductController::class, 'show']);
+
+    // Metadata endpoints
+    Route::get('/meta/categories', [ProductController::class, 'getCategories']);
+    Route::get('/meta/brands', [ProductController::class, 'getBrands']);
+    Route::get('/meta/tags', [ProductController::class, 'getTags']);
+
+    // Combined filter options endpoint (optional - provides all filter data in one request)
+    Route::get('/meta/filter-options', [ProductController::class, 'getFilterOptions']);
+
+    // Backward compatibility routes (optional - can be removed later)
     Route::get('/categories', [ProductController::class, 'getCategories']);
     Route::get('/brands', [ProductController::class, 'getBrands']);
     Route::get('/tags', [ProductController::class, 'getTags']);
@@ -101,10 +107,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 });
 
 // Admin user management routes (protected by auth:sanctum and admin middleware)
-// Then add these routes inside your admin middleware group:
 Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
-    // ... existing product routes ...
-
     // User management routes
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
