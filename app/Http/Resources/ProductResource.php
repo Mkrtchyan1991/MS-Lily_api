@@ -16,38 +16,52 @@ class ProductResource extends JsonResource
     {
         // Gibt die Produktdaten als Array zurück
         return [
-            'id'          => $this->id,  //Produkt id
-            'name'        => $this->name,  //Produkt name
-            'description' => $this->description,  //Produkt Beschreibung
-            'category'    => [
-                //Gipt Kategorie id zurück,wenn gips nicht dann null
-                'id'   => $this->category->id ?? null,
-                 //Gipt Kategorie name zurück,wenn gips nicht dann null
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description,
+            'category' => [
+                'id' => $this->category->id ?? null,
                 'name' => $this->category->name ?? null,
             ],
-            'brand'       => [
-                 //Gipt brand id zurück,wenn gips nicht dann null
-                'id'   => $this->brand->id ?? null,
-                 //Gipt brand name zurück,wenn gips nicht dann null
+            'brand' => [
+                'id' => $this->brand->id ?? null,
                 'name' => $this->brand->name ?? null,
             ],
-             //Gipt die Daten zurück
-            'tags'        => $this->tags->map(function ($tag) {
+            'tags' => $this->tags->map(function ($tag) {
                 return [
                     'id' => $tag->id,
                     'name' => $tag->name,
                 ];
             }),
-            'color'       => $this->color,
-            'size'        => $this->size,
-            'price'       => $this->price ? (float) $this->price : null,
-            'stock'       => $this->stock ?? 0,
-            'in_stock'    => ($this->stock ?? 0) > 0,
-             //Wenn gips bild bring zurück storage/ URL,wenn gips nicht dann null
-            'image'       => $this->image ? asset('storage/' . $this->image) : null,
-            //Gipt zurück die Erstellungsdatum
-            'created_at'  => $this->created_at,
-            'updated_at'  => $this->updated_at,
+            'color' => $this->color,
+            'size' => $this->size,
+            'price' => $this->price ? (float) $this->price : null,
+            'stock' => $this->stock ?? 0,
+            'in_stock' => ($this->stock ?? 0) > 0,
+
+            // Generate absolute URL for image
+            'image' => $this->image ? $this->getAbsoluteImageUrl() : null,
+
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
+    }
+
+    /**
+     * Generate absolute URL for the image
+     *
+     * @return string
+     */
+    private function getAbsoluteImageUrl(): string
+    {
+        // Get the base URL from config or request
+        $baseUrl = config('app.url') ?: request()->getSchemeAndHttpHost();
+
+        // Remove trailing slash from base URL and leading slash from image path
+        $baseUrl = rtrim($baseUrl, '/');
+        $imagePath = ltrim($this->image, '/');
+
+        // Construct full URL
+        return $baseUrl . '/storage/' . $imagePath;
     }
 }
