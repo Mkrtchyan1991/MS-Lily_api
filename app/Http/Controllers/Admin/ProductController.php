@@ -128,6 +128,10 @@ class ProductController extends Controller
             'tags' => 'nullable|array',//wenn gips,soll arr sein
             'tags.*' => 'exists:tags,id',//jeder tag id muss in tags tebele sein
             'image' => 'nullable|image|max:2048',
+            'textDark' => 'nullable|string|max:255',
+            'del' => 'nullable|string',
+            'textSuccess' => 'nullable|string',
+            'star' => 'nullable|numeric|min:0|max:5',
         ]);
 
         // Hier wird geprüft, ob eine Bilddatei mitgeschickt wurde. Falls ja, wird sie im Ordner storage/app/public/products/ gespeichert, und der Pfad wird zurückgegeben. Falls nicht, bleibt der Pfad null.
@@ -146,6 +150,10 @@ class ProductController extends Controller
             'price' => $request->price,
             'stock' => $request->stock,
             'image' => $path,
+            'textDark' => $request->textDark,
+            'del' => $request->del,
+            'textSuccess' => $request->textSuccess,
+            'star' => $request->star,
         ]);
         //verbindet die Produkte mit tags, many-to-many 
         $product->tags()->sync($request->tags ?? []);
@@ -167,6 +175,10 @@ class ProductController extends Controller
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
             'image' => 'nullable|image|max:2048',
+            'textDark' => 'nullable|string|max:255',
+            'del' => 'nullable|string',
+            'textSuccess' => 'nullable|string',
+            'star' => 'nullable|numeric|min:0|max:5',
         ]);
 
         //zuerst nehmen wir die alte route von bild($product->image) wenn mit form neue bild ist geschickt 
@@ -186,6 +198,10 @@ class ProductController extends Controller
             'price' => $request->price,
             'stock' => $request->stock,
             'image' => $path,
+            'textDark' => $request->textDark,
+            'del' => $request->del,
+            'textSuccess' => $request->textSuccess,
+            'star' => $request->star,
         ]);
         //Aktualisiert die tags von der Produkte,wenn es gips keine die verbindung wird gelöscht.Das ist für many-to-many
         $product->tags()->sync($request->tags ?? []);
@@ -227,6 +243,7 @@ class ProductController extends Controller
             'price_range' => $priceRange,
             'colors' => $colors,
             'sizes' => $sizes,
+                                
         ]);
     }
 }
