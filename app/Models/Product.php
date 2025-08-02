@@ -14,7 +14,12 @@ class Product extends Model
         'size',
         'image',
         'price',
-        'stock'
+        'stock',
+        'textDark',
+        'del',
+        'textSuccess',
+        'star',
+        
     ];
 
     public function category() {
