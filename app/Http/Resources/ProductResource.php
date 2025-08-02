@@ -44,6 +44,10 @@ class ProductResource extends JsonResource
 
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'textDark' => $this->textDark,
+            'del' => $this->del,
+            'textSuccess' => $this->textSuccess,
+            'star' => $this->star,
         ];
     }
 
