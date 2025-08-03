@@ -66,7 +66,12 @@ class OrderController extends Controller
 
     public function userOrders(Request $request)
     {
-        $orders = $request->user()->orders()->with(['shippingAddress', 'orderItems.product'])->latest()->get();
+        $orders = $request->user()
+            ->orders()
+            ->with(['shippingAddress', 'orderItems.product'])
+            ->latest()
+            ->get();
+
         return OrderResource::collection($orders);
     }
 
