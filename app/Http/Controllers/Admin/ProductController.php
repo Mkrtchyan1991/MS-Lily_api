@@ -136,7 +136,7 @@ class ProductController extends Controller
 
         // Hier wird geprüft, ob eine Bilddatei mitgeschickt wurde. Falls ja, wird sie im Ordner storage/app/public/products/ gespeichert, und der Pfad wird zurückgegeben. Falls nicht, bleibt der Pfad null.
         $path = $request->hasFile('image')
-            ? $request->file('image')->store('products', 'public')
+            ? $request->file('image')->store('products', 'koyeb')
             : null;
 
         //  Erstellt ein neues Produkt in der Datenbank
@@ -185,7 +185,7 @@ class ProductController extends Controller
         //wenn keine neues Bild hochgeladen wurde,bleibt der alte Pfand erhalten
         $path = $product->image;
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', 'public');
+            $path = $request->file('image')->store('products', 'koyeb');
         }
         //Das Produkt wird in Datenbank aktualisiert min neuen werten aus dem Request
         $product->update([
