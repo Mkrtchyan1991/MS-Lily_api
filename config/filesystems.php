@@ -47,6 +47,15 @@ return [
             'report' => false,
         ],
 
+        'koyeb' => [
+            'driver' => 'local',
+            'root' => env('KOYEB_VOLUME_PATH', storage_path('app/public')),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

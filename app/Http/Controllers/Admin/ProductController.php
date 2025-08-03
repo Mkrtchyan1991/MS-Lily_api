@@ -15,6 +15,8 @@ use App\Models\Tag;
 use App\Http\Controllers\Controller;
 // Request empfangt Formularen und APIs
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 //wir erstellen neue ProductController,der von Laravel bassis-classe erbt(jarangel)
 class ProductController extends Controller
@@ -134,10 +136,22 @@ class ProductController extends Controller
             'star' => 'nullable|numeric|min:0|max:5',
         ]);
 
+        $storageRoot = Storage::disk('koyeb')->path('');
+        Log::info('koyeb storage root path: ' . $storageRoot);
+
+        $existingFiles = Storage::disk('koyeb')->allFiles();
+        Log::info('Files on koyeb disk before upload:', $existingFiles);
+
         // Hier wird geprüft, ob eine Bilddatei mitgeschickt wurde. Falls ja, wird sie im Ordner storage/app/public/products/ gespeichert, und der Pfad wird zurückgegeben. Falls nicht, bleibt der Pfad null.
         $path = $request->hasFile('image')
-            ? $request->file('image')->store('products', 'public')
+            ? $request->file('image')->store('products', 'koyeb')
             : null;
+
+        if ($path) {
+            Log::info('Image stored at: ' . Storage::disk('koyeb')->path($path));
+            $filesAfter = Storage::disk('koyeb')->allFiles();
+            Log::info('Files on koyeb disk after upload:', $filesAfter);
+        }
 
         //  Erstellt ein neues Produkt in der Datenbank
         $product = Product::create([
@@ -185,7 +199,7 @@ class ProductController extends Controller
         //wenn keine neues Bild hochgeladen wurde,bleibt der alte Pfand erhalten
         $path = $product->image;
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', 'public');
+            $path = $request->file('image')->store('products', 'koyeb');
         }
         //Das Produkt wird in Datenbank aktualisiert min neuen werten aus dem Request
         $product->update([
