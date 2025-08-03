@@ -56,7 +56,7 @@ class AuthController extends Controller
         //für Email verfy
         event(new Registered($user));
 
-        //gpbt eine JSON antwort zurück
+        //gibt eine JSON Antwort zurück
         return response()->json(['message' => 'User registered'], 201);
     }
 
