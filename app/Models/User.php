@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Order;
 
 
 
@@ -33,8 +34,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
+    /**
+     * Get all orders placed by the user.
+     */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 }
+
