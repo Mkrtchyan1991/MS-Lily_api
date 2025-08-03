@@ -72,6 +72,8 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Create startup script
 RUN echo '#!/bin/sh' > /app/start.sh \
+   && echo 'php artisan config:clear' >> /app/start.sh \
+   && echo 'php artisan storage:link' >> /app/start.sh \
    && echo 'php artisan migrate --force' >> /app/start.sh \
    && echo 'exec php -S 0.0.0.0:3000 -t public' >> /app/start.sh \
    && chmod +x /app/start.sh
