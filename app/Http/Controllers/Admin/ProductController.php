@@ -189,19 +189,32 @@ class ProductController extends Controller
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
             'image' => 'nullable|image|max:2048',
+            'delete_image' => 'nullable|string', // Add this validation
             'textDark' => 'nullable|string|max:255',
             'del' => 'nullable|string',
             'textSuccess' => 'nullable|string',
             'star' => 'nullable|numeric|min:0|max:5',
         ]);
 
-        //zuerst nehmen wir die alte route von bild($product->image) wenn mit form neue bild ist geschickt 
-        //wenn keine neues Bild hochgeladen wurde,bleibt der alte Pfand erhalten
-        $path = $product->image;
-        if ($request->hasFile('image')) {
+        // Handle image logic
+        $path = $product->image; // Keep existing image by default
+
+        if ($request->has('delete_image') && $request->delete_image === 'true') {
+            // User wants to delete the image
+            if ($product->image && Storage::disk('koyeb')->exists($product->image)) {
+                Storage::disk('koyeb')->delete($product->image);
+            }
+            $path = null; // Set to null to remove from database
+        } elseif ($request->hasFile('image')) {
+            // New image uploaded - delete old one if exists
+            if ($product->image && Storage::disk('koyeb')->exists($product->image)) {
+                Storage::disk('koyeb')->delete($product->image);
+            }
             $path = $request->file('image')->store('products', 'koyeb');
         }
-        //Das Produkt wird in Datenbank aktualisiert min neuen werten aus dem Request
+        // If neither delete_image nor new image, keep existing image ($path stays as $product->image)
+
+        // Update the product in database
         $product->update([
             'name' => $request->name,
             'description' => $request->description,
@@ -217,12 +230,12 @@ class ProductController extends Controller
             'textSuccess' => $request->textSuccess,
             'star' => $request->star,
         ]);
-        //Aktualisiert die tags von der Produkte,wenn es gips keine die verbindung wird gelöscht.Das ist für many-to-many
+
+        // Update the tags
         $product->tags()->sync($request->tags ?? []);
 
         return response()->json(['message' => 'Product updated!', 'product' => $product]);
     }
-
     //diese function löscht die Daten von der Produkt
     public function destroy(Product $product)
     {
@@ -257,7 +270,7 @@ class ProductController extends Controller
             'price_range' => $priceRange,
             'colors' => $colors,
             'sizes' => $sizes,
-                                
+
         ]);
     }
 }
