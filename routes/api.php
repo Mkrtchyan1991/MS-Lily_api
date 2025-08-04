@@ -95,15 +95,17 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // Admin comment routes
     Route::group(['middleware' => ['admin']], function () {
-        // New comprehensive admin endpoints
+        // Existing routes...
         Route::get('/admin/comments', [CommentController::class, 'getAllComments']);
         Route::get('/admin/comments/{id}', [CommentController::class, 'getComment']);
         Route::patch('/admin/comments/{id}/approve', [CommentController::class, 'approve']);
         Route::patch('/admin/comments/{id}/reject', [CommentController::class, 'reject']);
+
+        // Add this new route:
+        Route::patch('/admin/comments/{id}/status', [CommentController::class, 'updateStatus']);
+
         Route::delete('/admin/comments/{id}', [CommentController::class, 'deleteComment']);
         Route::patch('/admin/comments/batch', [CommentController::class, 'batchUpdateComments']);
-
-        // Legacy endpoint for backward compatibility
         Route::get('/admin/comments/pending', [CommentController::class, 'pending']);
     });
 });

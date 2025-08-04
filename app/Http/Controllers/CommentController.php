@@ -199,18 +199,22 @@ class CommentController extends Controller
     }
 
     /**
-     * Legacy method for backward compatibility
-     * @deprecated Use getAllComments with status filter instead
+     * Update comment status (Admin only)
+     * Handles PATCH /admin/comments/{id}/status
      */
-    public function pending()
+    public function updateStatus(Request $request, $id)
     {
-        $comments = Comment::where('status', 'pending')
-            ->with(['user', 'product'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $request->validate([
+            'status' => 'required|string|in:pending,approved,rejected'
+        ]);
+
+        $comment = Comment::findOrFail($id);
+        $comment->status = $request->status;
+        $comment->save();
 
         return response()->json([
-            'data' => CommentResource::collection($comments)
+            'data' => new CommentResource($comment->load(['user', 'product'])),
+            'message' => "Comment status updated to {$request->status} successfully"
         ]);
     }
 }
