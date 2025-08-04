@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Comment;
 use App\Http\Resources\CommentResource;
+use Illuminate\Validation\Rule;
 
 class CommentController extends Controller
 {
+    /**
+     * Store a new comment for a product
+     */
     public function store(Request $request, $productId)
     {
         $request->validate([
@@ -18,44 +22,195 @@ class CommentController extends Controller
             'user_id' => auth()->id(),
             'product_id' => $productId,
             'content' => $request->content,
-            'status' => 'pending'
+            'status' => 'pending' // Default status
         ]);
 
-        return new CommentResource($comment->load(['user', 'product']));
+        return response()->json([
+            'data' => new CommentResource($comment->load(['user', 'product'])),
+            'message' => 'Comment created successfully'
+        ], 201);
     }
 
-    public function index(Request $request)
+    /**
+     * Get comments for a specific product (public endpoint)
+     */
+    public function indexByProduct(Request $request, $productId)
+    {
+        $query = Comment::where('product_id', $productId)
+            ->where('status', 'approved')
+            ->with(['user'])
+            ->orderBy('created_at', 'desc');
+
+        // Add pagination support
+        $perPage = $request->get('per_page', 15);
+        $comments = $query->paginate($perPage);
+
+        return response()->json([
+            'data' => CommentResource::collection($comments->items()),
+            'meta' => [
+                'current_page' => $comments->currentPage(),
+                'per_page' => $comments->perPage(),
+                'total' => $comments->total(),
+                'last_page' => $comments->lastPage(),
+            ]
+        ]);
+    }
+
+    /**
+     * Get all comments with filtering and pagination (Admin only)
+     */
+    public function getAllComments(Request $request)
     {
         $query = Comment::with(['user', 'product']);
 
-        if ($status = $request->query('status')) {
-            $query->where('status', $status);
+        // Status filter
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
         }
 
-        $comments = $query->get();
+        // Search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('content', 'LIKE', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'LIKE', "%{$search}%")
+                            ->orWhere('email', 'LIKE', "%{$search}%");
+                    })
+                    ->orWhereHas('product', function ($productQuery) use ($search) {
+                        $productQuery->where('name', 'LIKE', "%{$search}%");
+                    });
+            });
+        }
 
-        return CommentResource::collection($comments);
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+
+        $allowedSortFields = ['created_at', 'updated_at', 'id', 'status'];
+        if (in_array($sortBy, $allowedSortFields)) {
+            $query->orderBy($sortBy, $sortOrder);
+        }
+
+        // Pagination
+        $perPage = $request->get('per_page', 15);
+        $comments = $query->paginate($perPage);
+
+        return response()->json([
+            'data' => CommentResource::collection($comments->items()),
+            'meta' => [
+                'current_page' => $comments->currentPage(),
+                'per_page' => $comments->perPage(),
+                'total' => $comments->total(),
+                'last_page' => $comments->lastPage(),
+            ]
+        ]);
     }
 
-    public function updateStatus(Request $request, $id)
+    /**
+     * Get a specific comment (Admin only)
+     */
+    public function getComment($id)
     {
-        $request->validate([
-            'status' => 'required|in:approved,rejected,pending',
-        ]);
+        $comment = Comment::with(['user', 'product'])->findOrFail($id);
 
+        return response()->json([
+            'data' => new CommentResource($comment)
+        ]);
+    }
+
+    /**
+     * Approve a comment (Admin only)
+     */
+    public function approve($id)
+    {
         $comment = Comment::findOrFail($id);
-        $comment->status = $request->status;
+        $comment->status = 'approved';
         $comment->save();
 
-        return new CommentResource($comment->load(['user', 'product']));
+        return response()->json([
+            'data' => new CommentResource($comment->load(['user', 'product'])),
+            'message' => 'Comment approved successfully'
+        ]);
     }
 
-    public function indexByProduct($productId)
+    /**
+     * Reject a comment (Admin only)
+     */
+    public function reject($id)
     {
-        $comments = Comment::where('product_id', $productId)
-            ->where('status', 'approved')
-            ->with(['user'])->get();
+        $comment = Comment::findOrFail($id);
+        $comment->status = 'rejected';
+        $comment->save();
 
-        return CommentResource::collection($comments);
+        return response()->json([
+            'data' => new CommentResource($comment->load(['user', 'product'])),
+            'message' => 'Comment rejected successfully'
+        ]);
+    }
+
+    /**
+     * Delete a comment (Admin only)
+     */
+    public function deleteComment($id)
+    {
+        $comment = Comment::findOrFail($id);
+        $comment->delete();
+
+        return response()->json([
+            'data' => null,
+            'message' => 'Comment deleted successfully'
+        ]);
+    }
+
+    /**
+     * Batch update comments (Admin only)
+     */
+    public function batchUpdateComments(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:comments,id',
+            'action' => 'required|string|in:approve,reject,delete'
+        ]);
+
+        $ids = $request->ids;
+        $action = $request->action;
+        $updated = 0;
+
+        switch ($action) {
+            case 'approve':
+                $updated = Comment::whereIn('id', $ids)->update(['status' => 'approved']);
+                break;
+
+            case 'reject':
+                $updated = Comment::whereIn('id', $ids)->update(['status' => 'rejected']);
+                break;
+
+            case 'delete':
+                $updated = Comment::whereIn('id', $ids)->delete();
+                break;
+        }
+
+        return response()->json([
+            'data' => null,
+            'message' => "Successfully {$action}d {$updated} comment(s)"
+        ]);
+    }
+
+    /**
+     * Legacy method for backward compatibility
+     * @deprecated Use getAllComments with status filter instead
+     */
+    public function pending()
+    {
+        $comments = Comment::where('status', 'pending')
+            ->with(['user', 'product'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'data' => CommentResource::collection($comments)
+        ]);
     }
 }

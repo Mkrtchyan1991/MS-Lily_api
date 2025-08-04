@@ -84,15 +84,27 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     });
 });
 
-// Comments routes (protected)
+// Comments routes 
+Route::prefix('products')->group(function () {
+    Route::get('/{productId}/comments', [CommentController::class, 'indexByProduct']);
+});
+
+// Protected comment routes (require authentication)
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/products/{productId}/comments', [CommentController::class, 'store']);
-    Route::get('/products/{productId}/comments', [CommentController::class, 'indexByProduct']);
 
     // Admin comment routes
     Route::group(['middleware' => ['admin']], function () {
-        Route::get('/admin/comments', [CommentController::class, 'index']);
-        Route::patch('/admin/comments/{id}/status', [CommentController::class, 'updateStatus']);
+        // New comprehensive admin endpoints
+        Route::get('/admin/comments', [CommentController::class, 'getAllComments']);
+        Route::get('/admin/comments/{id}', [CommentController::class, 'getComment']);
+        Route::patch('/admin/comments/{id}/approve', [CommentController::class, 'approve']);
+        Route::patch('/admin/comments/{id}/reject', [CommentController::class, 'reject']);
+        Route::delete('/admin/comments/{id}', [CommentController::class, 'deleteComment']);
+        Route::patch('/admin/comments/batch', [CommentController::class, 'batchUpdateComments']);
+
+        // Legacy endpoint for backward compatibility
+        Route::get('/admin/comments/pending', [CommentController::class, 'pending']);
     });
 });
 
