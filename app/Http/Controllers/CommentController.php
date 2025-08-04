@@ -18,11 +18,15 @@ class CommentController extends Controller
             'content' => 'required|string|max:1000',
         ]);
 
+        $status = auth()->user()?->role === 'admin'
+            ? Comment::STATUS_APPROVED
+            : Comment::STATUS_PENDING;
+
         $comment = Comment::create([
             'user_id' => auth()->id(),
             'product_id' => $productId,
             'content' => $request->content,
-            'status' => 'pending' // Default status
+            'status' => $status,
         ]);
 
         return response()->json([
