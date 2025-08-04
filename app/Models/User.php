@@ -7,7 +7,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\Order;
+use App\Models\Product;
 
 
 
@@ -40,6 +42,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    /**
+     * The products that the user has marked as favorites.
+     */
+    public function favoriteProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'favorites')->withTimestamps();
     }
 }
 
