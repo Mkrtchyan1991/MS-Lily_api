@@ -91,8 +91,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // Admin comment routes
     Route::group(['middleware' => ['admin']], function () {
-        Route::get('/admin/comments/pending', [CommentController::class, 'pending']);
-        Route::patch('/admin/comments/{id}/approve', [CommentController::class, 'approve']);
+        Route::get('/admin/comments', [CommentController::class, 'index']);
+        Route::patch('/admin/comments/{id}/status', [CommentController::class, 'updateStatus']);
     });
 });
 

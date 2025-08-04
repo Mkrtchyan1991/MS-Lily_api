@@ -18,22 +18,33 @@ class CommentController extends Controller
             'user_id' => auth()->id(),
             'product_id' => $productId,
             'content' => $request->content,
-            'approved' => false
+            'status' => 'pending'
         ]);
 
         return new CommentResource($comment->load(['user', 'product']));
     }
 
-    public function pending()
+    public function index(Request $request)
     {
-        $comments = Comment::where('approved', false)->with(['user', 'product'])->get();
+        $query = Comment::with(['user', 'product']);
+
+        if ($status = $request->query('status')) {
+            $query->where('status', $status);
+        }
+
+        $comments = $query->get();
+
         return CommentResource::collection($comments);
     }
 
-    public function approve($id)
+    public function updateStatus(Request $request, $id)
     {
+        $request->validate([
+            'status' => 'required|in:approved,rejected,pending',
+        ]);
+
         $comment = Comment::findOrFail($id);
-        $comment->approved = true;
+        $comment->status = $request->status;
         $comment->save();
 
         return new CommentResource($comment->load(['user', 'product']));
@@ -42,7 +53,7 @@ class CommentController extends Controller
     public function indexByProduct($productId)
     {
         $comments = Comment::where('product_id', $productId)
-            ->where('approved', true)
+            ->where('status', 'approved')
             ->with(['user'])->get();
 
         return CommentResource::collection($comments);
