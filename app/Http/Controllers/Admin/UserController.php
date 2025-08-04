@@ -11,9 +11,15 @@ class UserController extends Controller
    /**
     * Display a listing of users
     */
-   public function index()
+   public function index(Request $request)
    {
-      $users = User::latest()->paginate(10);
+      $query = User::latest();
+
+      // Pagination - allow custom per_page parameter
+      $perPage = $request->get('per_page', 10);
+      $perPage = min(max($perPage, 1), 100); // limit between 1 and 100
+
+      $users = $query->paginate($perPage);
       return response()->json($users);
    }
 
