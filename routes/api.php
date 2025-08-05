@@ -98,6 +98,7 @@ Route::prefix('products')->group(function () {
 // Protected comment routes (require authentication)
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/products/{productId}/comments', [CommentController::class, 'store']);
+    Route::patch('/comments/{id}', [CommentController::class, 'update']);
 
     // Admin comment routes
     Route::group(['middleware' => ['admin']], function () {
