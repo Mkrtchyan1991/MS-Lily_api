@@ -36,6 +36,34 @@ class CommentController extends Controller
     }
 
     /**
+     * Update an existing comment (only owner)
+     */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'content' => 'required|string|max:1000',
+        ]);
+
+        $comment = Comment::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        $status = auth()->user()?->role === 'admin'
+            ? Comment::STATUS_APPROVED
+            : Comment::STATUS_PENDING;
+
+        $comment->update([
+            'content' => $request->content,
+            'status' => $status,
+        ]);
+
+        return response()->json([
+            'data' => new CommentResource($comment->load(['user', 'product'])),
+            'message' => 'Comment updated successfully'
+        ]);
+    }
+
+    /**
      * Get comments for a specific product (public endpoint)
      */
     public function indexByProduct(Request $request, $productId)
@@ -100,6 +128,13 @@ class CommentController extends Controller
         $perPage = $request->get('per_page', 15);
         $comments = $query->paginate($perPage);
 
+        $counts = [
+            'total' => Comment::count(),
+            'pending' => Comment::where('status', Comment::STATUS_PENDING)->count(),
+            'approved' => Comment::where('status', Comment::STATUS_APPROVED)->count(),
+            'rejected' => Comment::where('status', Comment::STATUS_REJECTED)->count(),
+        ];
+
         return response()->json([
             'data' => CommentResource::collection($comments->items()),
             'meta' => [
@@ -107,7 +142,8 @@ class CommentController extends Controller
                 'per_page' => $comments->perPage(),
                 'total' => $comments->total(),
                 'last_page' => $comments->lastPage(),
-            ]
+            ],
+            'counts' => $counts,
         ]);
     }
 

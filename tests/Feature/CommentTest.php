@@ -69,5 +69,98 @@ class CommentTest extends TestCase
             'status' => Comment::STATUS_PENDING,
         ]);
     }
+
+    public function test_user_can_update_their_comment(): void
+    {
+        $product = $this->createProduct();
+        $user = User::factory()->create(['role' => 'user']);
+
+        $comment = Comment::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => 'Original comment',
+            'status' => Comment::STATUS_PENDING,
+        ]);
+
+        Sanctum::actingAs($user);
+
+        $response = $this->patchJson("/api/comments/{$comment->id}", [
+            'content' => 'Updated comment',
+        ]);
+
+        $response->assertStatus(200)
+                 ->assertJsonPath('data.content', 'Updated comment')
+                 ->assertJsonPath('data.status', Comment::STATUS_PENDING);
+
+        $this->assertDatabaseHas('comments', [
+            'id' => $comment->id,
+            'content' => 'Updated comment',
+        ]);
+    }
+
+    public function test_user_cannot_update_others_comment(): void
+    {
+        $product = $this->createProduct();
+        $owner = User::factory()->create(['role' => 'user']);
+        $other = User::factory()->create(['role' => 'user']);
+
+        $comment = Comment::create([
+            'user_id' => $owner->id,
+            'product_id' => $product->id,
+            'content' => 'Owner comment',
+            'status' => Comment::STATUS_PENDING,
+        ]);
+
+        Sanctum::actingAs($other);
+
+        $response = $this->patchJson("/api/comments/{$comment->id}", [
+            'content' => 'Hacked comment',
+        ]);
+
+        $response->assertStatus(404);
+
+        $this->assertDatabaseHas('comments', [
+            'id' => $comment->id,
+            'content' => 'Owner comment',
+        ]);
+    }
+
+    public function test_admin_comments_endpoint_returns_counts(): void
+    {
+        $product = $this->createProduct();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $user = User::factory()->create(['role' => 'user']);
+
+        Comment::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => 'Pending comment',
+            'status' => Comment::STATUS_PENDING,
+        ]);
+
+        Comment::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => 'Approved comment',
+            'status' => Comment::STATUS_APPROVED,
+        ]);
+
+        Comment::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => 'Rejected comment',
+            'status' => Comment::STATUS_REJECTED,
+        ]);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/admin/comments');
+
+        $response->assertStatus(200)
+                 ->assertJsonPath('counts.total', 3)
+                 ->assertJsonPath('counts.pending', 1)
+                 ->assertJsonPath('counts.approved', 1)
+                 ->assertJsonPath('counts.rejected', 1);
+    }
 }
 
