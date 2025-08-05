@@ -83,8 +83,7 @@ RUN CACHE_STORE=file SESSION_DRIVER=file php artisan config:clear \
    && CACHE_STORE=file SESSION_DRIVER=file php artisan cache:clear \
    && CACHE_STORE=file SESSION_DRIVER=file php artisan route:clear \
    && CACHE_STORE=file SESSION_DRIVER=file php artisan view:clear \
-   && CACHE_STORE=file SESSION_DRIVER=file php artisan config:cache \
-   && CACHE_STORE=file SESSION_DRIVER=file php artisan docs:generate
+   && CACHE_STORE=file SESSION_DRIVER=file php artisan config:cache
 
 # Expose port 3000 (matches your run command)
 EXPOSE 3000
@@ -115,9 +114,6 @@ RUN echo '#!/bin/sh' > /app/start.sh \
    && echo 'else' >> /app/start.sh \
    && echo '    echo "No migrations found, skipping database setup"' >> /app/start.sh \
    && echo 'fi' >> /app/start.sh \
-   && echo '' >> /app/start.sh \
-   && echo '# Generate API documentation' >> /app/start.sh \
-   && echo 'php artisan docs:generate || echo "API docs generation failed"' >> /app/start.sh \
    && echo '' >> /app/start.sh \
    && echo 'echo "Starting PHP development server on port 3000..."' >> /app/start.sh \
    && echo 'exec php -S 0.0.0.0:3000 -t public' >> /app/start.sh \
