@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array<int, class-string>
      */
     protected $commands = [
-        Commands\GenerateApiDocs::class,
+        Commands\GenerateSwagger::class,
     ];
 
     /**
