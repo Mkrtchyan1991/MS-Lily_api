@@ -36,6 +36,34 @@ class CommentController extends Controller
     }
 
     /**
+     * Update an existing comment (only owner)
+     */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'content' => 'required|string|max:1000',
+        ]);
+
+        $comment = Comment::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        $status = auth()->user()?->role === 'admin'
+            ? Comment::STATUS_APPROVED
+            : Comment::STATUS_PENDING;
+
+        $comment->update([
+            'content' => $request->content,
+            'status' => $status,
+        ]);
+
+        return response()->json([
+            'data' => new CommentResource($comment->load(['user', 'product'])),
+            'message' => 'Comment updated successfully'
+        ]);
+    }
+
+    /**
      * Get comments for a specific product (public endpoint)
      */
     public function indexByProduct(Request $request, $productId)

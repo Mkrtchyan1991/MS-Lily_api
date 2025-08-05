@@ -69,5 +69,60 @@ class CommentTest extends TestCase
             'status' => Comment::STATUS_PENDING,
         ]);
     }
+
+    public function test_user_can_update_their_comment(): void
+    {
+        $product = $this->createProduct();
+        $user = User::factory()->create(['role' => 'user']);
+
+        $comment = Comment::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => 'Original comment',
+            'status' => Comment::STATUS_PENDING,
+        ]);
+
+        Sanctum::actingAs($user);
+
+        $response = $this->patchJson("/api/comments/{$comment->id}", [
+            'content' => 'Updated comment',
+        ]);
+
+        $response->assertStatus(200)
+                 ->assertJsonPath('data.content', 'Updated comment')
+                 ->assertJsonPath('data.status', Comment::STATUS_PENDING);
+
+        $this->assertDatabaseHas('comments', [
+            'id' => $comment->id,
+            'content' => 'Updated comment',
+        ]);
+    }
+
+    public function test_user_cannot_update_others_comment(): void
+    {
+        $product = $this->createProduct();
+        $owner = User::factory()->create(['role' => 'user']);
+        $other = User::factory()->create(['role' => 'user']);
+
+        $comment = Comment::create([
+            'user_id' => $owner->id,
+            'product_id' => $product->id,
+            'content' => 'Owner comment',
+            'status' => Comment::STATUS_PENDING,
+        ]);
+
+        Sanctum::actingAs($other);
+
+        $response = $this->patchJson("/api/comments/{$comment->id}", [
+            'content' => 'Hacked comment',
+        ]);
+
+        $response->assertStatus(404);
+
+        $this->assertDatabaseHas('comments', [
+            'id' => $comment->id,
+            'content' => 'Owner comment',
+        ]);
+    }
 }
 
