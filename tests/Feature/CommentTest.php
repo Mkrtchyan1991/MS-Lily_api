@@ -124,5 +124,43 @@ class CommentTest extends TestCase
             'content' => 'Owner comment',
         ]);
     }
+
+    public function test_admin_comments_endpoint_returns_counts(): void
+    {
+        $product = $this->createProduct();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $user = User::factory()->create(['role' => 'user']);
+
+        Comment::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => 'Pending comment',
+            'status' => Comment::STATUS_PENDING,
+        ]);
+
+        Comment::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => 'Approved comment',
+            'status' => Comment::STATUS_APPROVED,
+        ]);
+
+        Comment::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'content' => 'Rejected comment',
+            'status' => Comment::STATUS_REJECTED,
+        ]);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/admin/comments');
+
+        $response->assertStatus(200)
+                 ->assertJsonPath('counts.total', 3)
+                 ->assertJsonPath('counts.pending', 1)
+                 ->assertJsonPath('counts.approved', 1)
+                 ->assertJsonPath('counts.rejected', 1);
+    }
 }
 
