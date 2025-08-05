@@ -11,6 +11,8 @@ use App\Models\Category;
 use App\Models\Brand;
 // Produkt hat eine Kategorie
 use App\Models\Tag;
+use App\Models\Color;
+use App\Models\Size;
 //Basis Controller von laravel
 use App\Http\Controllers\Controller;
 // Request empfangt Formularen und APIs
@@ -259,9 +261,9 @@ class ProductController extends Controller
         // Get price range
         $priceRange = Product::selectRaw('MIN(price) as min_price, MAX(price) as max_price')->first();
 
-        // Get available colors and sizes
-        $colors = Product::whereNotNull('color')->distinct()->pluck('color');
-        $sizes = Product::whereNotNull('size')->distinct()->pluck('size');
+        // Get available colors and sizes from dedicated tables
+        $colors = Color::pluck('name');
+        $sizes = Size::pluck('name');
 
         return response()->json([
             'categories' => $categories,
