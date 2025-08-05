@@ -15,12 +15,14 @@ class UserController extends Controller
    {
       $query = User::latest();
 
-      // Pagination - allow custom per_page parameter
-      $perPage = $request->get('per_page', 10);
-      $perPage = min(max($perPage, 1), 100); // limit between 1 and 100
+      if ($request->filled('role')) {
+         $query->where('role', $request->role);  // filter by role
+      }
 
-      $users = $query->paginate($perPage);
-      return response()->json($users);
+      $perPage = $request->get('per_page', 10);
+      $perPage = min(max($perPage, 1), 100);
+
+      return response()->json($query->paginate($perPage));
    }
 
    /**
