@@ -78,7 +78,19 @@ class OrderController extends Controller
     public function allOrders()
     {
         $orders = Order::with(['shippingAddress', 'orderItems.product', 'user'])->latest()->get();
-        return OrderResource::collection($orders);
+
+        $summary = [
+            'total_orders' => Order::count(),
+            'pending' => Order::where('status', 'pending')->count(),
+            'processing' => Order::where('status', 'processing')->count(),
+            'shipped' => Order::where('status', 'shipped')->count(),
+            'delivered' => Order::where('status', 'delivered')->count(),
+            'total_revenue' => Order::sum('total'),
+        ];
+
+        return OrderResource::collection($orders)->additional([
+            'summary' => $summary,
+        ]);
     }
 
     public function updateStatus(Request $request, Order $order)
