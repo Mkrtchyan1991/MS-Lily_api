@@ -64,16 +64,28 @@ class UserController extends Controller
       $user = User::findOrFail($id);
 
       $request->validate([
-         'name' => 'required|string|max:255',
-         'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-         'role' => 'nullable|string|in:admin,user',
+         'name' => 'sometimes|required|string|max:255',
+         'last_name' => 'sometimes|nullable|string|max:255',
+         'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
+         'mobile_number' => 'sometimes|nullable|string|max:255',
+         'role' => 'sometimes|string|in:admin,user',
+         'country' => 'sometimes|nullable|string|max:255',
+         'address' => 'sometimes|nullable|string|max:255',
+         'city' => 'sometimes|nullable|string|max:255',
+         'postal_code' => 'sometimes|nullable|string|max:255',
       ]);
 
-      $user->update([
-         'name' => $request->name,
-         'email' => $request->email,
-         'role' => $request->role ?? $user->role,
-      ]);
+      $user->update($request->only([
+         'name',
+         'last_name',
+         'email',
+         'mobile_number',
+         'role',
+         'country',
+         'address',
+         'city',
+         'postal_code',
+      ]));
 
       return response()->json(['message' => 'User updated successfully!', 'user' => $user]);
    }
