@@ -11,6 +11,11 @@ use App\Http\Controllers\Orders\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\TagController;
+use App\Http\Controllers\Admin\ColorController;
+use App\Http\Controllers\Admin\SizeController;
 
 use App\Http\Controllers\Auth\VerificationController;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -118,4 +123,42 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::post('/users', [UserController::class, 'store']);
     Route::patch('/users/{id}', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
+});
+
+// Admin category, brand, tag, color, and size routes (protected)
+Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
+    // Category routes
+    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::get('/categories/{id}', [CategoryController::class, 'show']);
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::patch('/categories/{id}', [CategoryController::class, 'update']);
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+
+    // Brand routes
+    Route::get('/brands', [BrandController::class, 'index']);
+    Route::get('/brands/{id}', [BrandController::class, 'show']);
+    Route::post('/brands', [BrandController::class, 'store']);
+    Route::patch('/brands/{id}', [BrandController::class, 'update']);
+    Route::delete('/brands/{id}', [BrandController::class, 'destroy']);
+
+    // Tag routes
+    Route::get('/tags', [TagController::class, 'index']);
+    Route::get('/tags/{id}', [TagController::class, 'show']);
+    Route::post('/tags', [TagController::class, 'store']);
+    Route::patch('/tags/{id}', [TagController::class, 'update']);
+    Route::delete('/tags/{id}', [TagController::class, 'destroy']);
+
+    // Color routes
+    Route::get('/colors', [ColorController::class, 'index']);
+    Route::get('/colors/{id}', [ColorController::class, 'show']);
+    Route::post('/colors', [ColorController::class, 'store']);
+    Route::patch('/colors/{id}', [ColorController::class, 'update']);
+    Route::delete('/colors/{id}', [ColorController::class, 'destroy']);
+
+    // Size routes
+    Route::get('/sizes', [SizeController::class, 'index']);
+    Route::get('/sizes/{id}', [SizeController::class, 'show']);
+    Route::post('/sizes', [SizeController::class, 'store']);
+    Route::patch('/sizes/{id}', [SizeController::class, 'update']);
+    Route::delete('/sizes/{id}', [SizeController::class, 'destroy']);
 });
