@@ -92,4 +92,41 @@ class OrderController extends Controller
 
         return new OrderResource($order->fresh(['shippingAddress', 'orderItems.product']));
     }
+
+    public function update(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => 'sometimes|in:pending,processing,shipped,delivered,canceled',
+            'shipping_address' => 'sometimes|array',
+            'shipping_address.full_name' => 'sometimes|string',
+            'shipping_address.address_line1' => 'sometimes|string',
+            'shipping_address.address_line2' => 'nullable|string',
+            'shipping_address.city' => 'sometimes|string',
+            'shipping_address.state' => 'sometimes|string',
+            'shipping_address.postal_code' => 'sometimes|string',
+            'shipping_address.country' => 'sometimes|string',
+            'shipping_address.phone' => 'sometimes|string',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            if ($request->filled('status')) {
+                $order->status = $request->status;
+            }
+
+            if ($request->has('shipping_address')) {
+                $order->shippingAddress->update($request->shipping_address);
+            }
+
+            $order->save();
+
+            DB::commit();
+
+            return new OrderResource($order->fresh(['shippingAddress', 'orderItems.product']));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Failed to update order', 'details' => $e->getMessage()], 500);
+        }
+    }
 }
