@@ -85,6 +85,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Admin order routes
     Route::group(['middleware' => ['admin']], function () {
         Route::get('/admin/orders', [OrderController::class, 'allOrders']);
+        Route::patch('/admin/orders/{order}', [OrderController::class, 'update']);
         Route::patch('/admin/orders/{order}/status', [OrderController::class, 'updateStatus']);
     });
 });
