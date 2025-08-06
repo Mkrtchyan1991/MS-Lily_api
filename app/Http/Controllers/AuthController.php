@@ -11,7 +11,6 @@ use Illuminate\Validation\Rules\Password;
 use App\Rules\InternationalMobilePhone;
 use App\Models\User;
 use App\Http\Resources\UserResource;
-use Illuminate\Auth\Events\Registered;
 
 class AuthController extends Controller
 {
@@ -53,8 +52,8 @@ class AuthController extends Controller
             'role' => $request->get('role', 'user') //wenn keine Rolle geschrieben wird,wird automatisch user gesetzt
         ]);
 
-        //für Email verfy
-        event(new Registered($user));
+        // Send verification email to the newly registered user
+        $user->sendEmailVerificationNotification();
 
         //gibt eine JSON Antwort zurück
         return response()->json(['message' => 'User registered'], 201);
