@@ -24,7 +24,7 @@ class ProfileController extends Controller
             'address' => 'required|string|max:100',
             'city' => 'required|string|max:100',
             'postal_code' => 'required|string|max:10', // Changed from 'number' to 'string'
-            'mobile_number' => 'string|max:15',
+            'mobile_number' => 'required|string|max:15',
             'email' => "required|email|unique:users,email,{$user->id}",
             'password' => 'nullable|min:6|confirmed',
         ]);
