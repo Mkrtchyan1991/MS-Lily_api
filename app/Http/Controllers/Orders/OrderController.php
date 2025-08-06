@@ -85,6 +85,7 @@ class OrderController extends Controller
             'processing' => Order::where('status', 'processing')->count(),
             'shipped' => Order::where('status', 'shipped')->count(),
             'delivered' => Order::where('status', 'delivered')->count(),
+            'canceled' => Order::where('status', 'canceled')->count(),
             'total_revenue' => Order::sum('total'),
         ];
 
