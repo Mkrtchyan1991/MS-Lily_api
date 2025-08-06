@@ -41,17 +41,33 @@ class UserController extends Controller
    {
       $request->validate([
          'name' => 'required|string|max:255',
+         'last_name' => 'nullable|string|max:255',
          'email' => 'required|string|email|max:255|unique:users',
-         'password' => 'required|string|min:8',
+         'mobile_number' => 'nullable|string|max:255',
+         'password' => 'required|string|min:8|confirmed',
          'role' => 'nullable|string|in:admin,user',
+         'country' => 'nullable|string|max:255',
+         'address' => 'nullable|string|max:255',
+         'city' => 'nullable|string|max:255',
+         'postal_code' => 'nullable|string|max:255',
       ]);
 
-      $user = User::create([
-         'name' => $request->name,
-         'email' => $request->email,
-         'password' => bcrypt($request->password),
-         'role' => $request->role ?? 'user',
+      $data = $request->only([
+         'name',
+         'last_name',
+         'email',
+         'mobile_number',
+         'role',
+         'country',
+         'address',
+         'city',
+         'postal_code',
       ]);
+
+      $data['password'] = bcrypt($request->password);
+      $data['role'] = $request->role ?? 'user';
+
+      $user = User::create($data);
 
       return response()->json(['message' => 'User created successfully!', 'user' => $user], 201);
    }
