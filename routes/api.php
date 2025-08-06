@@ -152,10 +152,10 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
 
     // Color routes
     Route::get('/colors', [ColorController::class, 'index']);
-    Route::get('/colors/{id}', [ColorController::class, 'show']);
+    Route::get('/colors/{color}', [ColorController::class, 'show']);
     Route::post('/colors', [ColorController::class, 'store']);
-    Route::patch('/colors/{id}', [ColorController::class, 'update']);
-    Route::delete('/colors/{id}', [ColorController::class, 'destroy']);
+    Route::patch('/colors/{color}', [ColorController::class, 'update']);
+    Route::delete('/colors/{color}', [ColorController::class, 'destroy']);
 
     // Size routes
     Route::get('/sizes', [SizeController::class, 'index']);
