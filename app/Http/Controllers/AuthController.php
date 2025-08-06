@@ -25,15 +25,16 @@ class AuthController extends Controller
 
         //validation
         $request->validate([
-            'name' => 'sometimes|string|max:100',
-            'last_name' => 'sometimes|string|max:100',
-            'email' => 'sometimes|string|email|max:255|unique:users,email',
-            'mobile_number' => ['sometimes', InternationalMobilePhone::forCreate()],//wenn wir required schreben wollen mussen wir 'name' schreiben,sonst gipt es ein Fehler HTTP 422 in yaak
-            'country' => 'sometimes|string|max:100',
-            'address' => 'sometimes|string|max:100',
-            'city' => 'sometimes|string|max:100',
-            'postal_code' => 'sometimes|string|max:10',
-            'password' => ['sometimes', 'string', $passwordRule] //sometimes-wenn gips dieses Feld dann validiere es,wenn nicht ist in ordnung
+            'name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'mobile_number' => ['required', InternationalMobilePhone::forCreate()],
+            'country' => 'required|string|max:100',
+            'address' => 'required|string|max:100',
+            'city' => 'required|string|max:100',
+            'postal_code' => 'required|string|max:10',
+            'password' => ['required', 'string', $passwordRule],
+            'role' => 'required|string|in:admin,user'
         ]);
 
         $passwordHash = Hash::make($request->get('password')); //Wichtig, Hier wird sicher verschlüsselt geschpeichert das Passwort
@@ -49,7 +50,7 @@ class AuthController extends Controller
             'email' => $request->get('email'),
             'postal_code' => $request->get('postal_code'),
             'password' => $passwordHash,
-            'role' => $request->get('role', 'user') //wenn keine Rolle geschrieben wird,wird automatisch user gesetzt
+            'role' => $request->get('role')
         ]);
 
         // Send verification email to the newly registered user

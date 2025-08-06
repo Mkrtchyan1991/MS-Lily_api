@@ -41,15 +41,15 @@ class UserController extends Controller
    {
       $request->validate([
          'name' => 'required|string|max:255',
-         'last_name' => 'nullable|string|max:255',
+         'last_name' => 'required|string|max:255',
          'email' => 'required|string|email|max:255|unique:users',
-         'mobile_number' => 'nullable|string|max:255',
+         'mobile_number' => 'required|string|max:255',
          'password' => 'required|string|min:8|confirmed',
-         'role' => 'nullable|string|in:admin,user',
-         'country' => 'nullable|string|max:255',
-         'address' => 'nullable|string|max:255',
-         'city' => 'nullable|string|max:255',
-         'postal_code' => 'nullable|string|max:255',
+         'role' => 'required|string|in:admin,user',
+         'country' => 'required|string|max:255',
+         'address' => 'required|string|max:255',
+         'city' => 'required|string|max:255',
+         'postal_code' => 'required|string|max:255',
       ]);
 
       $data = $request->only([
@@ -65,7 +65,7 @@ class UserController extends Controller
       ]);
 
       $data['password'] = bcrypt($request->password);
-      $data['role'] = $request->role ?? 'user';
+      $data['role'] = $request->role;
 
       $user = User::create($data);
 
@@ -80,15 +80,15 @@ class UserController extends Controller
       $user = User::findOrFail($id);
 
       $request->validate([
-         'name' => 'sometimes|required|string|max:255',
-         'last_name' => 'sometimes|nullable|string|max:255',
-         'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
-         'mobile_number' => 'sometimes|nullable|string|max:255',
-         'role' => 'sometimes|string|in:admin,user',
-         'country' => 'sometimes|nullable|string|max:255',
-         'address' => 'sometimes|nullable|string|max:255',
-         'city' => 'sometimes|nullable|string|max:255',
-         'postal_code' => 'sometimes|nullable|string|max:255',
+         'name' => 'required|string|max:255',
+         'last_name' => 'required|string|max:255',
+         'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+         'mobile_number' => 'required|string|max:255',
+         'role' => 'required|string|in:admin,user',
+         'country' => 'required|string|max:255',
+         'address' => 'required|string|max:255',
+         'city' => 'required|string|max:255',
+         'postal_code' => 'required|string|max:255',
       ]);
 
       $user->update($request->only([
