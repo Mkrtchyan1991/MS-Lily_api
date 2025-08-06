@@ -30,6 +30,9 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
     return response()->json(['message' => 'Email verified!']);
 })->middleware(['signed'])->name('verification.verify');
 
+Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
+    ->middleware('throttle:6,1');
+
 // Protected routes (require Bearer token authentication)
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/user', fn(Request $request) => response()->json($request->user()));

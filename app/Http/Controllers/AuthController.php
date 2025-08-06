@@ -59,6 +59,27 @@ class AuthController extends Controller
         return response()->json(['message' => 'User registered'], 201);
     }
 
+    public function resendVerificationEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $user = User::where('email', $request->input('email'))->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email already verified'], 400);
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return response()->json(['message' => 'Verification link sent']);
+    }
+
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
