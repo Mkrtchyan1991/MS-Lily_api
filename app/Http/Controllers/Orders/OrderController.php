@@ -97,7 +97,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $request->validate([
-            'status' => 'required|in:pending,processing,shipped,delivered,canceled' //targmanel
+            'status' => 'required|in:pending,processing,shipped,delivered,cancelled' //targmanel
         ]);
 
         $order->status = $request->status;
@@ -109,7 +109,7 @@ class OrderController extends Controller
     public function update(Request $request, Order $order)
     {
         $request->validate([
-            'status' => 'sometimes|in:pending,processing,shipped,delivered,canceled',
+            'status' => 'sometimes|in:pending,processing,shipped,delivered,cancelled',
             'shipping_address' => 'sometimes|array',
             'shipping_address.full_name' => 'sometimes|string',
             'shipping_address.address_line1' => 'sometimes|string',
