@@ -19,9 +19,9 @@ class ColorController extends Controller
     /**
      * Display the specified color
      */
-    public function show($id)
+    public function show($identifier)
     {
-        $color = Color::findOrFail($id);
+        $color = $this->findColor($identifier);
         return response()->json($color);
     }
 
@@ -44,9 +44,9 @@ class ColorController extends Controller
     /**
      * Update the specified color
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $identifier)
     {
-        $color = Color::findOrFail($id);
+        $color = $this->findColor($identifier);
 
         $request->validate([
             'name' => 'required|string|max:255|unique:colors,name,' . $color->id,
@@ -62,11 +62,18 @@ class ColorController extends Controller
     /**
      * Remove the specified color
      */
-    public function destroy($id)
+    public function destroy($identifier)
     {
-        $color = Color::findOrFail($id);
+        $color = $this->findColor($identifier);
         $color->delete();
 
         return response()->json(['message' => 'Color deleted!']);
+    }
+
+    private function findColor($identifier)
+    {
+        return Color::where('id', $identifier)
+            ->orWhere('name', $identifier)
+            ->firstOrFail();
     }
 }
