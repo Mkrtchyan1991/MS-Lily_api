@@ -34,6 +34,7 @@ class AdminOrdersSummaryTest extends TestCase
             ['status' => 'processing', 'total' => 200],
             ['status' => 'shipped', 'total' => 250],
             ['status' => 'delivered', 'total' => 300],
+            ['status' => 'canceled', 'total' => 50],
         ];
 
         foreach ($orders as $data) {
@@ -51,11 +52,12 @@ class AdminOrdersSummaryTest extends TestCase
         $response = $this->getJson('/api/admin/orders');
 
         $response->assertStatus(200)
-            ->assertJsonPath('summary.total_orders', 5)
+            ->assertJsonPath('summary.total_orders', 6)
             ->assertJsonPath('summary.pending', 2)
             ->assertJsonPath('summary.processing', 1)
             ->assertJsonPath('summary.shipped', 1)
             ->assertJsonPath('summary.delivered', 1)
-            ->assertJsonPath('summary.total_revenue', 1000);
+            ->assertJsonPath('summary.canceled', 1)
+            ->assertJsonPath('summary.total_revenue', 1050);
     }
 }
